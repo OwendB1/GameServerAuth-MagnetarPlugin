@@ -7,8 +7,7 @@ using Shared.Logging;
 
 namespace Shared.Config;
 
-// Ported from Torch's Persistent<T> class for compatibility of configuration files between targets and to work with IPluginLogger.
-// Simple class that manages saving <see cref="P:Torch.Persistent`1.Data" /> to disk using XML serialization.
+// Simple class that manages saving configuration data to disk using XML serialization.
 // Can automatically save on changes by implementing <see cref="T:System.ComponentModel.INotifyPropertyChanged" /> in the data class.
 /// <typeparam name="T">Data class type</typeparam>
 public class PersistentConfig<T> : IDisposable where T : class, INotifyPropertyChanged, new()

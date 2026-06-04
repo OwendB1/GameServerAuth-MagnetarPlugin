@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <AssemblyName>PluginTemplate</AssemblyName>
+    <AssemblyName>GameServerAuth</AssemblyName>
     <LangVersion>14</LangVersion>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
@@ -27,6 +27,11 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>DEDICATED;TRACE;DEV_BUILD</DefineConstants>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PluginSdkDll Condition="'$(PluginSdkDll)' == '' AND Exists('/home/owendb/.local/share/Magnetar/Bin/PluginSdk.dll')">/home/owendb/.local/share/Magnetar/Bin/PluginSdk.dll</PluginSdkDll>
+    <PluginSdkDll Condition="'$(PluginSdkDll)' == '' AND Exists('/home/owendb/Documents/GitHub/Magnetar/PluginSdk/bin/Debug/netstandard2.0/PluginSdk.dll')">/home/owendb/Documents/GitHub/Magnetar/PluginSdk/bin/Debug/netstandard2.0/PluginSdk.dll</PluginSdkDll>
   </PropertyGroup>
 
   <ItemGroup>
@@ -651,7 +656,18 @@
 
   <ItemGroup>
     <Content Include="Deploy.bat" />
+    <Content Include="manifest.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <Reference Include="PluginSdk">
+      <HintPath>$(PluginSdkDll)</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

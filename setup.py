@@ -23,7 +23,6 @@ PT_PROJECT_NAME = r"^([A-Z][a-z_0-9]+)+$"
 RX_PROJECT_NAME = re.compile(PT_PROJECT_NAME)
 
 PROJECT_NAMES = (
-    "ClientPlugin",
     "ServerPlugin",
     "Shared",
 )
@@ -100,7 +99,6 @@ def _rename_project(name: str) -> None:
         print("Solution:")
         for filename in (
             f'{TEMPLATE_NAME}.sln',
-            f'{TEMPLATE_NAME}Client.xml',
             f'{TEMPLATE_NAME}Server.xml',
         ):
             if os.path.exists(filename):

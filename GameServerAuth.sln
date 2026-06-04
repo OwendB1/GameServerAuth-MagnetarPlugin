@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerPlugin", "ServerPlugin\ServerPlugin.csproj", "{455FCC35-6369-4771-B060-DBD463F739B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{A9A6EBB9-12F5-485D-A8E5-B93255249564}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{0E08C67F-DF93-4814-80CC-25F1288A880B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{75919FCB-E258-4690-ABD5-44597B3D9D65}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+		AGENTS.md = AGENTS.md
+		GameServerAuthServer.xml = GameServerAuthServer.xml
+		LICENSE = LICENSE
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{455FCC35-6369-4771-B060-DBD463F739B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{455FCC35-6369-4771-B060-DBD463F739B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{455FCC35-6369-4771-B060-DBD463F739B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{455FCC35-6369-4771-B060-DBD463F739B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{455FCC35-6369-4771-B060-DBD463F739B9}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{455FCC35-6369-4771-B060-DBD463F739B9}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A9A6EBB9-12F5-485D-A8E5-B93255249564}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9A6EBB9-12F5-485D-A8E5-B93255249564}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9A6EBB9-12F5-485D-A8E5-B93255249564}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9A6EBB9-12F5-485D-A8E5-B93255249564}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
