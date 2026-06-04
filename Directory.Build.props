@@ -1,0 +1,48 @@
+<Project>
+  <PropertyGroup>
+    <!-- Folder containing SpaceEngineers.exe.
+         Fill the path between the tags to override; leave empty to use the
+         platform-specific auto-detection below. -->
+    <Bin64></Bin64>
+
+    <!-- Folder containing SpaceEngineersDedicated.exe.
+         Fill the path between the tags to override; leave empty to use the
+         platform-specific auto-detection below. -->
+    <Dedicated64></Dedicated64>
+  </PropertyGroup>
+
+  <!-- User home, resolved once for the Linux auto-detection below -->
+  <PropertyGroup Condition=" !$([MSBuild]::IsOSPlatform('Windows')) ">
+    <_UserHome>$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))</_UserHome>
+  </PropertyGroup>
+
+  <!-- Auto-detect Bin64 (Space Engineers, Steam app 244850) when not explicitly set above -->
+  <PropertyGroup>
+    <!-- Windows: Steam App registry key -->
+    <_SeInstallLocation Condition=" '$(Bin64)' == '' AND $([MSBuild]::IsOSPlatform('Windows')) ">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850@InstallLocation)</_SeInstallLocation>
+    <Bin64 Condition=" '$(Bin64)' == '' AND '$(_SeInstallLocation)' != '' ">$(_SeInstallLocation)\Bin64</Bin64>
+
+    <!-- Windows: standard Steam install path -->
+    <Bin64 Condition=" '$(Bin64)' == '' AND $([MSBuild]::IsOSPlatform('Windows')) AND Exists('C:\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64') ">C:\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64</Bin64>
+
+    <!-- Linux: common Steam install locations under the user home -->
+    <Bin64 Condition=" '$(Bin64)' == '' AND '$(_UserHome)' != '' AND Exists('$(_UserHome)/.steam/steam/steamapps/common/SpaceEngineers/Bin64') ">$(_UserHome)/.steam/steam/steamapps/common/SpaceEngineers/Bin64</Bin64>
+    <Bin64 Condition=" '$(Bin64)' == '' AND '$(_UserHome)' != '' AND Exists('$(_UserHome)/.local/share/Steam/steamapps/common/SpaceEngineers/Bin64') ">$(_UserHome)/.local/share/Steam/steamapps/common/SpaceEngineers/Bin64</Bin64>
+    <Bin64 Condition=" '$(Bin64)' == '' AND '$(_UserHome)' != '' AND Exists('$(_UserHome)/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/SpaceEngineers/Bin64') ">$(_UserHome)/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/SpaceEngineers/Bin64</Bin64>
+  </PropertyGroup>
+
+  <!-- Auto-detect Dedicated64 (Dedicated Server, Steam app 298740) when not explicitly set above -->
+  <PropertyGroup>
+    <!-- Windows: Steam App registry key -->
+    <_DsInstallLocation Condition=" '$(Dedicated64)' == '' AND $([MSBuild]::IsOSPlatform('Windows')) ">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 298740@InstallLocation)</_DsInstallLocation>
+    <Dedicated64 Condition=" '$(Dedicated64)' == '' AND '$(_DsInstallLocation)' != '' ">$(_DsInstallLocation)\DedicatedServer64</Dedicated64>
+
+    <!-- Windows: standard Steam install path -->
+    <Dedicated64 Condition=" '$(Dedicated64)' == '' AND $([MSBuild]::IsOSPlatform('Windows')) AND Exists('C:\Program Files (x86)\Steam\steamapps\common\SpaceEngineersDedicatedServer\DedicatedServer64') ">C:\Program Files (x86)\Steam\steamapps\common\SpaceEngineersDedicatedServer\DedicatedServer64</Dedicated64>
+
+    <!-- Linux: common Steam install locations under the user home -->
+    <Dedicated64 Condition=" '$(Dedicated64)' == '' AND '$(_UserHome)' != '' AND Exists('$(_UserHome)/.steam/steam/steamapps/common/SpaceEngineersDedicatedServer/DedicatedServer64') ">$(_UserHome)/.steam/steam/steamapps/common/SpaceEngineersDedicatedServer/DedicatedServer64</Dedicated64>
+    <Dedicated64 Condition=" '$(Dedicated64)' == '' AND '$(_UserHome)' != '' AND Exists('$(_UserHome)/.local/share/Steam/steamapps/common/SpaceEngineersDedicatedServer/DedicatedServer64') ">$(_UserHome)/.local/share/Steam/steamapps/common/SpaceEngineersDedicatedServer/DedicatedServer64</Dedicated64>
+    <Dedicated64 Condition=" '$(Dedicated64)' == '' AND '$(_UserHome)' != '' AND Exists('$(_UserHome)/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/SpaceEngineersDedicatedServer/DedicatedServer64') ">$(_UserHome)/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/SpaceEngineersDedicatedServer/DedicatedServer64</Dedicated64>
+  </PropertyGroup>
+</Project>
