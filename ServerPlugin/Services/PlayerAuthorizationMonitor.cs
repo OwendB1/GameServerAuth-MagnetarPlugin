@@ -649,6 +649,19 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
         }
 
         var currentLevel = MySession.Static.GetUserPromoteLevel(steamId);
+
+        // SE reserves MyPromoteLevel.Owner for the server owner and restores it; never demote them.
+        if (currentLevel == MyPromoteLevel.Owner)
+        {
+            return;
+        }
+
+        // Owner cannot be granted to a normal player; never set it via the plugin.
+        if (targetLevel == MyPromoteLevel.Owner)
+        {
+            targetLevel = MyPromoteLevel.Admin;
+        }
+
         if (currentLevel == targetLevel)
         {
             return;
