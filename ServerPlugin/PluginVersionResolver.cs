@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Reflection;
-using System.Xml;
 
 namespace ServerPlugin;
 
@@ -24,48 +22,9 @@ internal static class PluginVersionResolver
                 return _cachedVersion;
             }
 
-            _cachedVersion = ReadManifestVersion() ?? ReadAssemblyVersion();
+            _cachedVersion = ReadAssemblyVersion();
             return _cachedVersion;
         }
-    }
-
-    private static string ReadManifestVersion()
-    {
-        try
-        {
-            var manifestPath = ResolveManifestPath();
-            if (string.IsNullOrWhiteSpace(manifestPath) || !File.Exists(manifestPath))
-            {
-                return null;
-            }
-
-            var document = new XmlDocument();
-            document.Load(manifestPath);
-            var versionNode = document.SelectSingleNode("/PluginManifest/Version");
-            var version = versionNode?.InnerText?.Trim();
-            return string.IsNullOrWhiteSpace(version) ? null : version;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static string ResolveManifestPath()
-    {
-        try
-        {
-            var assemblyDirectory = Path.GetDirectoryName(typeof(PluginVersionResolver).Assembly.Location);
-            if (!string.IsNullOrWhiteSpace(assemblyDirectory))
-            {
-                return Path.Combine(assemblyDirectory, "manifest.xml");
-            }
-        }
-        catch
-        {
-        }
-
-        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "manifest.xml");
     }
 
     private static string ReadAssemblyVersion()

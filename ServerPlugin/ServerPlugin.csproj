@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net10.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AssemblyName>GameServerAuth</AssemblyName>
     <LangVersion>14</LangVersion>
@@ -248,10 +248,6 @@
     </Reference>
     <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <HintPath>$(Dedicated64)\System.IO.Compression.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>$(Dedicated64)\System.IO.Compression.ZipFile.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.IO.FileSystem, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -656,9 +652,6 @@
 
   <ItemGroup>
     <Content Include="Deploy.bat" />
-    <Content Include="manifest.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="app.config" />
   </ItemGroup>
 
@@ -708,12 +701,10 @@
 
   <PropertyGroup Condition=" $([MSBuild]::IsOSPlatform('Windows')) ">
     <PreBuildEvent>call "$(SolutionDir)\verify_props.bat" "$(Dedicated64)"</PreBuildEvent>
-    <PostBuildEvent>call "$(MSBuildProjectDirectory)\Deploy.bat" "$(AssemblyName).dll" "$(MSBuildProjectDirectory)\$(OutputPath)$(TargetFramework)"</PostBuildEvent>
   </PropertyGroup>
 
   <PropertyGroup Condition=" !$([MSBuild]::IsOSPlatform('Windows')) ">
     <PreBuildEvent>sh "$(SolutionDir)verify_props.sh" "$(Dedicated64)"</PreBuildEvent>
-    <PostBuildEvent>sh "$(MSBuildProjectDirectory)/Deploy.sh" "$(AssemblyName).dll" "$(MSBuildProjectDirectory)/$(OutputPath.Replace('\','/'))$(TargetFramework)"</PostBuildEvent>
   </PropertyGroup>
 
   <Import Project="..\Shared\Shared.projitems" Label="Shared" />
