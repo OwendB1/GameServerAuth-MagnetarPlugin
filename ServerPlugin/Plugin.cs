@@ -68,7 +68,6 @@ public class Plugin : IPlugin, ICommonPlugin
 
         _configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
         _config = ConfigStorage.LoadXml<PluginConfig>(_configPath);
-        _config.PropertyChanged += ConfigChanged;
         if (string.IsNullOrWhiteSpace(_config.ServerId))
         {
             _config.ServerId = Guid.NewGuid().ToString("N");
@@ -98,6 +97,7 @@ public class Plugin : IPlugin, ICommonPlugin
         NexusClusterRedirectService = new NexusClusterRedirectService(Log);
         PlayerAuthorizationClient = new PluginPlayerAuthorizationClient(Log);
         SocketClient = new PluginSocketClient(Log, AuthorizationRuntime, BuildHeartbeatPayload);
+        _config.PropertyChanged += ConfigChanged;
         ApplyConfiguredRuntimeState();
 
         _initialized = true;
@@ -241,6 +241,12 @@ public class Plugin : IPlugin, ICommonPlugin
         if (!IsSessionLoaded || MyAPIGateway.Multiplayer?.Players == null)
         {
             LogManagerState("Game session or multiplayer player API unavailable. Player authorization monitor is waiting for session load.");
+            return;
+        }
+
+        if (AuthorizationRuntime == null || NexusClusterRedirectService == null)
+        {
+            LogManagerState("Runtime services unavailable. Player authorization monitor is waiting for plugin initialization.");
             return;
         }
 

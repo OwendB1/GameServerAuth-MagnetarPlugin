@@ -55,10 +55,10 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
         NexusClusterRedirectService nexusClusterRedirectService,
         Func<bool> isServiceConnected)
     {
-        this._log = log;
-        this._runtimeState = runtimeState;
-        this._nexusClusterRedirectService = nexusClusterRedirectService;
-        this._isServiceConnected = isServiceConnected;
+        this._log = log ?? throw new ArgumentNullException(nameof(log));
+        this._runtimeState = runtimeState ?? throw new ArgumentNullException(nameof(runtimeState));
+        this._nexusClusterRedirectService = nexusClusterRedirectService ?? throw new ArgumentNullException(nameof(nexusClusterRedirectService));
+        this._isServiceConnected = isServiceConnected ?? throw new ArgumentNullException(nameof(isServiceConnected));
 
         MyVisualScriptLogicProvider.PlayerConnected += OnPlayerConnected;
         MyVisualScriptLogicProvider.PlayerDisconnected += OnPlayerDisconnected;
