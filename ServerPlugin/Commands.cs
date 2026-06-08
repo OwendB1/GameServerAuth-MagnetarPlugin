@@ -430,38 +430,6 @@ public sealed class GsaCommands : GameServerAuthCommandModule
     public void Authorize() => HandleAuthorize();
 }
 
-[CommandRoot("gameserverauth", "GameServerAuth", "Discord-linked server authorization")]
-public sealed class GameServerAuthCommands : GameServerAuthCommandModule
-{
-    [Command("", "Prints the current settings")]
-    [Permission(MyPromoteLevel.None)]
-    public void Info() => RespondWithInfo();
-
-    [Command("info", "Prints the current settings")]
-    [Permission(MyPromoteLevel.None)]
-    public void InfoCommand() => RespondWithInfo();
-
-    [Command("enable", "Enables the plugin")]
-    [Permission(MyPromoteLevel.Admin)]
-    public void Enable() => EnablePlugin();
-
-    [Command("disable", "Disables the plugin")]
-    [Permission(MyPromoteLevel.Admin)]
-    public void Disable() => DisablePlugin();
-
-    [Command("status", "Prints auth runtime state")]
-    [Permission(MyPromoteLevel.Admin)]
-    public void Status() => RespondWithStatus();
-
-    [Command("accept", "Authorizes this cluster with your linked Discord and Steam account")]
-    [Permission(MyPromoteLevel.None)]
-    public void Accept() => HandleAccept();
-
-    [Command("authorize", "Opens the account-link and guild-join flow")]
-    [Permission(MyPromoteLevel.None)]
-    public void Authorize() => HandleAuthorize();
-}
-
 [CommandRoot("accept", "GameServerAuth", "Authorize this cluster")]
 public sealed class AcceptCommand : GameServerAuthCommandModule
 {

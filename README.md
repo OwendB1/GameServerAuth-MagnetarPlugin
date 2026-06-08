@@ -57,7 +57,6 @@ Chat command roots:
 
 ```text
 !gsa
-!gameserverauth
 ```
 
 Commands:

@@ -86,7 +86,7 @@ public class Plugin : IPlugin, ICommonPlugin
         try
         {
             ServerCommands.Register(Assembly.GetExecutingAssembly(),
-                typeof(GsaCommands), typeof(GameServerAuthCommands), typeof(AcceptCommand), typeof(AuthorizeCommand));
+                typeof(GsaCommands), typeof(AcceptCommand), typeof(AuthorizeCommand));
         }
         catch (Exception exception)
         {
