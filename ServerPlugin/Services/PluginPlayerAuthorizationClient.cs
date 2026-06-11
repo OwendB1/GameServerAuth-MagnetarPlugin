@@ -306,7 +306,7 @@ public sealed class PluginPlayerAuthorizationClient
                 response.Message = "Join the Discord guild that owns this cluster, then return to the game and run !accept again.";
                 break;
             case PluginPlayerAuthorizationStatus.RequiresRole:
-                response.Message = "Acquire the required Discord role in the owning guild, then return to the game and run !accept again.";
+                response.Message = "Acquire one of the required Discord roles in the owning guild, then return to the game and run !accept again.";
                 break;
             default:
                 response.Message = fallbackMessage;

@@ -130,8 +130,8 @@ public abstract class GameServerAuthCommandModule : CommandModule
                     caller,
                     accessStatus,
                     delaySeconds: 5,
-                    openingMessage: "Required Discord role missing. Steam overlay will open in 5 seconds with GameServerAuth instructions.",
-                    followupMessage: "After you get the required role, return to the game and run !accept again.",
+                    openingMessage: "Mapped Discord role missing. Steam overlay will open in 5 seconds with GameServerAuth instructions.",
+                    followupMessage: "After you get one of the required roles, return to the game and run !accept again.",
                     showInstructionDialog: true);
                 break;
 
@@ -271,8 +271,8 @@ public abstract class GameServerAuthCommandModule : CommandModule
                     caller,
                     result,
                     delaySeconds: 5,
-                    openingMessage: "Required Discord role missing. Steam overlay will open in 5 seconds with GameServerAuth instructions.",
-                    followupMessage: "After you get the required role, return to the game and run !accept again.",
+                    openingMessage: "Mapped Discord role missing. Steam overlay will open in 5 seconds with GameServerAuth instructions.",
+                    followupMessage: "After you get one of the required roles, return to the game and run !accept again.",
                     showInstructionDialog: true);
                 break;
 
@@ -358,7 +358,7 @@ public abstract class GameServerAuthCommandModule : CommandModule
 
         if (!string.IsNullOrWhiteSpace(response.RequiredDiscordRoleName))
         {
-            AppendDialogLine(builder, $"Required Discord role: {response.RequiredDiscordRoleName.Trim()}");
+            AppendDialogLine(builder, $"Required Discord roles: {response.RequiredDiscordRoleName.Trim()}");
         }
 
         if (!string.IsNullOrWhiteSpace(response.Instructions))

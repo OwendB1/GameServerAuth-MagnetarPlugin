@@ -822,11 +822,11 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
 
             case PluginPlayerAuthorizationStatus.RequiresRole:
                 message = isLobbyNode
-                    ? "Acquire the required Discord role, then run !accept."
-                    : $"Acquire the required Discord role. Run !accept within {graceSeconds} seconds to open cluster instructions or {actionText}.";
+                    ? "Acquire one of the required Discord roles, then run !accept."
+                    : $"Acquire one of the required Discord roles. Run !accept within {graceSeconds} seconds to open cluster instructions or {actionText}.";
                 fallbackMessage = isLobbyNode
-                    ? "Acquire the required Discord role, then run !accept."
-                    : "Acquire the required Discord role. Run !accept.";
+                    ? "Acquire one of the required Discord roles, then run !accept."
+                    : "Acquire one of the required Discord roles. Run !accept.";
                 logLabel = "required-role";
                 break;
 
