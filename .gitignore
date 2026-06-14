@@ -365,3 +365,6 @@ MigrationBackup/
 .claude
 
 # Plugin specific
+
+# Local config copied from Directory.Build.props.template by setup.py
+/Directory.Build.props

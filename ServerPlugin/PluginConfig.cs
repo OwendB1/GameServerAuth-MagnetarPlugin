@@ -11,7 +11,6 @@ namespace ServerPlugin;
 public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
 {
     private bool _enabled = true;
-    private bool _detectCodeChanges = true;
     private string _serverId = string.Empty;
     private string _discordGuildId = string.Empty;
     private string _clusterId = string.Empty;
@@ -25,13 +24,6 @@ public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
     {
         get => _enabled;
         set => SetField(ref _enabled, value);
-    }
-
-    [BoolOption("Disable the plugin if any changes to the game code are detected before patching", Parent = "general")]
-    public bool DetectCodeChanges
-    {
-        get => _detectCodeChanges;
-        set => SetField(ref _detectCodeChanges, value);
     }
 
     [StringOption(description: "Stable node identifier generated locally for this game server instance", Parent = "identity")]

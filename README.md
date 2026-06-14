@@ -26,18 +26,28 @@ The plugin output is:
 ServerPlugin/bin/Debug/net48/GameServerAuth.dll
 ```
 
-`ServerPlugin/ServerPlugin.csproj` references `PluginSdk.dll` from `$(PluginSdkDll)`. If that property is not set, it checks:
+`ServerPlugin/ServerPlugin.csproj` references `PluginSdk.dll` from `$(MagnetarBin)`,
+which is auto-detected from the Magnetar install location (`$(Magnetar)`) in
+`Directory.Build.props`. By default this resolves to:
 
 ```text
-/home/owendb/.local/share/Magnetar/Bin/PluginSdk.dll
-/home/owendb/Documents/GitHub/Magnetar/PluginSdk/bin/Debug/netstandard2.0/PluginSdk.dll
+Windows: %AppData%\Magnetar\Libraries\MagnetarLegacy   (net4x)
+         %AppData%\Magnetar\Libraries\MagnetarInterim  (net5+)
+Linux:   ~/.local/share/Magnetar/Bin
 ```
 
-Override it when needed:
+Override the Magnetar location when needed by setting `<Magnetar>` (or `<MagnetarBin>`
+directly) in your local `Directory.Build.props`, or on the command line:
 
 ```sh
-dotnet build GameServerAuth.sln -c Debug -p:PluginSdkDll=/path/to/PluginSdk.dll
+dotnet build GameServerAuth.sln -c Debug -p:Magnetar=/path/to/Magnetar
 ```
+
+`Directory.Build.props.template` is the template for `Directory.Build.props`, a **local,
+uncommitted** file holding the reference folder path overrides (`Bin64`, `Dedicated64`).
+`setup.py` copies the template to `Directory.Build.props` when it is missing, then fills in
+the auto-detected paths, so every contributor keeps their own local paths. Leaving a path
+empty falls back to the platform-specific auto-detection in the same file.
 
 ## Configuration
 
@@ -79,13 +89,17 @@ Commands:
 Use the Magnetar local plugin folder or the included deploy scripts after a build:
 
 ```sh
-ServerPlugin/Deploy.sh GameServerAuth.dll ServerPlugin/bin/Debug/net48
+ServerPlugin/Deploy.sh GameServerAuth.dll ServerPlugin/bin/Debug/net48 net48
 ```
 
 On Windows:
 
 ```bat
-ServerPlugin\Deploy.bat GameServerAuth.dll ServerPlugin\bin\Debug\net48
+ServerPlugin\Deploy.bat GameServerAuth.dll ServerPlugin\bin\Debug\net48 net48
 ```
+
+The optional third argument is the target framework moniker. It routes the deploy to the
+matching Magnetar edition: `net4x` builds go to `Magnetar/Legacy/Local`, newer ones to
+`Magnetar/Interim/Local` (when the Interim edition is installed).
 
 `GameServerAuthServer.xml` is the MagnetarHub metadata file for server-side publication.
