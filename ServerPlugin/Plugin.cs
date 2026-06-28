@@ -48,6 +48,9 @@ public class Plugin : IPlugin, ICommonPlugin
     private PluginConfig _config;
     private string _configPath;
     private static readonly string ConfigFileName = $"{PluginName}.xml";
+    private const int ConfigSaveDelayMilliseconds = 500;
+    private readonly object _configSaveSync = new object();
+    private Timer _configSaveTimer;
 
     public PluginSocketClient SocketClient { get; private set; }
     public PluginPlayerAuthorizationClient PlayerAuthorizationClient { get; private set; }
@@ -79,7 +82,7 @@ public class Plugin : IPlugin, ICommonPlugin
         if (string.IsNullOrWhiteSpace(_config.ServerId))
         {
             _config.ServerId = Guid.NewGuid().ToString("N");
-            SaveConfig();
+            SaveConfigNow();
         }
 
         var gameVersion = MyFinalBuildConstants.APP_VERSION_STRING.ToString();
@@ -127,7 +130,7 @@ public class Plugin : IPlugin, ICommonPlugin
             if (_config != null)
             {
                 _config.PropertyChanged -= ConfigChanged;
-                SaveConfig();
+                FlushConfigSave();
             }
 
             Log.Debug("Disposed");
@@ -344,11 +347,38 @@ public class Plugin : IPlugin, ICommonPlugin
 
     private void ConfigChanged(object sender, PropertyChangedEventArgs e)
     {
-        SaveConfig();
+        ScheduleConfigSave();
         ApplyConfiguredRuntimeState();
     }
 
-    private void SaveConfig()
+    private void ScheduleConfigSave()
+    {
+        lock (_configSaveSync)
+        {
+            if (_configSaveTimer == null)
+            {
+                _configSaveTimer = new Timer(_ => SaveConfigNow(), null, Timeout.Infinite, Timeout.Infinite);
+            }
+
+            _configSaveTimer.Change(ConfigSaveDelayMilliseconds, Timeout.Infinite);
+        }
+    }
+
+    private void FlushConfigSave()
+    {
+        Timer timer;
+        lock (_configSaveSync)
+        {
+            timer = _configSaveTimer;
+            _configSaveTimer = null;
+            timer?.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
+        timer?.Dispose();
+        SaveConfigNow();
+    }
+
+    private void SaveConfigNow()
     {
         if (_config == null || string.IsNullOrWhiteSpace(_configPath))
         {
@@ -357,7 +387,10 @@ public class Plugin : IPlugin, ICommonPlugin
 
         try
         {
-            ConfigStorage.SaveXml(_config, _configPath);
+            lock (_configSaveSync)
+            {
+                ConfigStorage.SaveXml(_config, _configPath);
+            }
         }
         catch (Exception exception)
         {

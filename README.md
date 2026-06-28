@@ -51,7 +51,11 @@ empty falls back to the platform-specific auto-detection in the same file.
 
 ## Configuration
 
-Magnetar stores the XML configuration through the Plugin SDK config system. Important options:
+Magnetar stores the XML configuration through the Plugin SDK config system
+(`ConfigStorage.LoadXml` / `ConfigStorage.SaveXml`). Runtime edits from Quasar
+or the GameServerAuth control plane are applied to the live `PluginConfig`,
+debounced to one XML write per change burst, and flushed when the plugin unloads.
+Important options:
 
 - `Enabled` - turns the plugin runtime on or off.
 - `ServerId` - GameServerAuth server identifier.
