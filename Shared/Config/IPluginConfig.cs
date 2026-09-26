@@ -8,7 +8,6 @@ public interface IPluginConfig : INotifyPropertyChanged
     // Enables the plugin
     bool Enabled { get; set; }
 
-    string ServerId { get; set; }
     string DiscordGuildId { get; set; }
     string ClusterId { get; set; }
     string ClusterSecret { get; set; }

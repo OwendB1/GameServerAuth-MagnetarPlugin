@@ -382,9 +382,15 @@ public sealed class PluginPlayerAuthorizationClient
             return false;
         }
 
+        if (string.IsNullOrEmpty(Common.InstanceId))
+        {
+            errorMessage = "Cluster launcher identity is incomplete: CLUSTER_ID and CLUSTER_NODE_ID are required.";
+            return false;
+        }
+
         request = new PluginPlayerAuthorizationRequest
         {
-            ServerId = Common.Config.ServerId.Trim(),
+            ServerId = Common.InstanceId,
             DiscordGuildId = guildId,
             ClusterId = clusterId,
             SteamId = steamId,
@@ -394,13 +400,6 @@ public sealed class PluginPlayerAuthorizationClient
         };
 
         var clusterSecret = Common.Config.ClusterSecret?.Trim();
-        if (string.IsNullOrWhiteSpace(request.ServerId))
-        {
-            errorMessage = "Server ID missing in plugin config.";
-            request = null;
-            return false;
-        }
-
         if (string.IsNullOrWhiteSpace(clusterSecret))
         {
             errorMessage = "Cluster secret missing in plugin config.";

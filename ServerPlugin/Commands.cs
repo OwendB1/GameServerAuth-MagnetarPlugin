@@ -6,6 +6,7 @@ using Contracts.Plugin;
 using PluginSdk.Commands;
 using Sandbox.Game;
 using Shared.Config;
+using Shared.Plugin;
 using VRage.Game.ModAPI;
 
 namespace ServerPlugin;
@@ -25,11 +26,11 @@ public abstract class GameServerAuthCommandModule : CommandModule
     {
         var config = Plugin.Instance.PluginConfig;
         Respond($"{Plugin.PluginName} plugin is enabled: {Format(config.Enabled)}");
-        Respond($"instance_id: {Format(config.ServerId)}");
+        Respond($"instance_id: {Common.InstanceId}");
         Respond($"discord_guild_id: {Format(config.DiscordGuildId)}");
         Respond($"cluster_id: {Format(config.ClusterId)}");
-        Respond($"node_name: {Format(config.NodeName)}");
-        Respond($"node_role: {config.NodeRole}");
+        Respond($"node_name: {Format(Common.NodeName)}");
+        Respond($"node_role: {Common.NodeRole}");
     }
 
     protected void EnablePlugin()

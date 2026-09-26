@@ -267,9 +267,15 @@ public sealed class PluginSocketClient : IDisposable
             return null;
         }
 
-        if (string.IsNullOrWhiteSpace(config.ServerId) || string.IsNullOrWhiteSpace(config.ClusterId))
+        if (string.IsNullOrWhiteSpace(config.ClusterId))
         {
-            LastError = "ServerId or ClusterId missing.";
+            LastError = "ClusterId missing.";
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(Common.InstanceId))
+        {
+            LastError = "Cluster launcher identity is incomplete: CLUSTER_ID and CLUSTER_NODE_ID are required.";
             return null;
         }
 
@@ -284,11 +290,11 @@ public sealed class PluginSocketClient : IDisposable
 
         var hello = new PluginHelloPayload
         {
-            ServerId = config.ServerId.Trim(),
+            ServerId = Common.InstanceId,
             DiscordGuildId = guildId,
             ClusterId = config.ClusterId.Trim(),
-            NodeName = string.IsNullOrWhiteSpace(config.NodeName) ? Environment.MachineName : config.NodeName.Trim(),
-            NodeRole = config.NodeRole,
+            NodeName = Common.NodeName,
+            NodeRole = Common.NodeRole,
             PluginVersion = pluginVersion,
             GameVersion = Common.GameVersion,
             NexusServerId = Plugin.Instance?.NexusClusterRedirectService?.GetCurrentServerId(),

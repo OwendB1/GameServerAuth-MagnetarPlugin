@@ -79,12 +79,6 @@ public class Plugin : IPlugin, ICommonPlugin
 
         _configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
         _config = ConfigStorage.LoadXml<PluginConfig>(_configPath);
-        if (string.IsNullOrWhiteSpace(_config.ServerId))
-        {
-            _config.ServerId = Guid.NewGuid().ToString("N");
-            SaveConfigNow();
-        }
-
         var gameVersion = MyFinalBuildConstants.APP_VERSION_STRING.ToString();
         Common.SetPlugin(this, gameVersion, MyFileSystem.UserDataPath);
 
@@ -276,17 +270,13 @@ public class Plugin : IPlugin, ICommonPlugin
 
     private PluginHeartbeatPayload BuildHeartbeatPayload()
     {
-        var configuredNodeName = string.IsNullOrWhiteSpace(Common.Config.NodeName)
-            ? Environment.MachineName
-            : Common.Config.NodeName.Trim();
-
         return new PluginHeartbeatPayload
         {
             OnlinePlayers = PlayerAuthorizationMonitor?.OnlinePlayerCount ?? 0,
             AuthorizedPlayers = AuthorizationRuntime?.AuthorizedPlayerCount ?? 0,
             StatusMessage = SocketClient?.LastError,
             NexusServerId = NexusClusterRedirectService?.GetCurrentServerId(),
-            NodeName = configuredNodeName
+            NodeName = Common.NodeName
         };
     }
 

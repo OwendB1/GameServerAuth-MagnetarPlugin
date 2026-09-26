@@ -17,13 +17,15 @@ The old client plugin is intentionally removed. This repository builds only the 
 Install the Space Engineers Dedicated Server build references and the .NET SDK required by the project, then build:
 
 ```sh
-dotnet build GameServerAuth.sln -c Debug
+dotnet build GameServerAuth-MagnetarPlugin.sln -c Debug
 ```
 
 The plugin output is:
 
 ```text
-ServerPlugin/bin/Debug/net48/GameServerAuth.dll
+Linux:   ServerPlugin/bin/Debug/net10.0/GameServerAuth.dll
+Windows: ServerPlugin/bin/Debug/net48/GameServerAuth.dll
+         ServerPlugin/bin/Debug/net10.0/GameServerAuth.dll
 ```
 
 `ServerPlugin/ServerPlugin.csproj` references `PluginSdk.dll` from `$(MagnetarBin)`,
@@ -36,11 +38,13 @@ Windows: %AppData%\Magnetar\Libraries\MagnetarLegacy   (net4x)
 Linux:   ~/.local/share/Magnetar/Bin
 ```
 
+Native cluster support requires Magnetar PluginSdk 2.4.2.3 or newer.
+
 Override the Magnetar location when needed by setting `<Magnetar>` (or `<MagnetarBin>`
 directly) in your local `Directory.Build.props`, or on the command line:
 
 ```sh
-dotnet build GameServerAuth.sln -c Debug -p:Magnetar=/path/to/Magnetar
+dotnet build GameServerAuth-MagnetarPlugin.sln -c Debug -p:Magnetar=/path/to/Magnetar
 ```
 
 `Directory.Build.props.template` is the template for `Directory.Build.props`, a **local,
@@ -55,13 +59,24 @@ Magnetar stores the XML configuration through the Plugin SDK config system
 (`ConfigStorage.LoadXml` / `ConfigStorage.SaveXml`). Runtime edits from Quasar
 or the GameServerAuth control plane are applied to the live `PluginConfig`,
 debounced to one XML write per change burst, and flushed when the plugin unloads.
+Native cluster nodes derive a stable GSA instance ID from the GSA registration
+ID, `CLUSTER_ID`, and `CLUSTER_NODE_ID`. The dashboard name comes from
+`CLUSTER_NODE_ID`. They report as cluster members, including the
+World Authority, regardless of the shared `NodeName` and `NodeRole` settings.
+The plugin refuses a cluster connection when either launcher identity is missing.
+Standalone or Nexus processes generate an instance ID per process; cloned
+configuration does not require a unique `ServerId` setting.
 Important options:
 
 - `Enabled` - turns the plugin runtime on or off.
-- `ServerId` - GameServerAuth server identifier.
 - `DiscordGuildId` - Discord guild identifier claimed for this server.
-- `ClusterId`, `ClusterSecret`, `NodeName`, `NodeRole` - cluster identity and signing configuration.
+- `ClusterId`, `ClusterSecret` - GSA cluster identity and signing configuration.
+- `NodeName`, `NodeRole` - standalone or Nexus identity; native clusters use launcher identity instead.
 - `LobbyServerId` - target lobby server for redirecting unauthorized cluster players.
+
+GSA management limits concurrent plugin connections per registered cluster.
+Its connection cap must cover every node that connects, including the World
+Authority; additional nodes receive HTTP 409 until the cap is raised in GSA.
 
 The plugin creates and saves default config on first load.
 
@@ -93,7 +108,7 @@ Commands:
 Use the Magnetar local plugin folder or the included deploy scripts after a build:
 
 ```sh
-ServerPlugin/Deploy.sh GameServerAuth.dll ServerPlugin/bin/Debug/net48 net48
+ServerPlugin/Deploy.sh GameServerAuth.dll ServerPlugin/bin/Debug/net10.0 net10.0
 ```
 
 On Windows:

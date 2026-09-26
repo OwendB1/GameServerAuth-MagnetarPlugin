@@ -11,7 +11,6 @@ namespace ServerPlugin;
 public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
 {
     private bool _enabled = true;
-    private string _serverId = string.Empty;
     private string _discordGuildId = string.Empty;
     private string _clusterId = string.Empty;
     private string _clusterSecret = string.Empty;
@@ -24,13 +23,6 @@ public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
     {
         get => _enabled;
         set => SetField(ref _enabled, value);
-    }
-
-    [StringOption(description: "Stable node identifier generated locally for this game server instance", Parent = "identity")]
-    public string ServerId
-    {
-        get => _serverId;
-        set => SetField(ref _serverId, value);
     }
 
     [StringOption(description: "Discord guild id copied from the owner dashboard", Parent = "identity")]
@@ -54,14 +46,14 @@ public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
         set => SetField(ref _clusterSecret, value);
     }
 
-    [StringOption(description: "Human-readable node name for logs and dashboard", Parent = "identity")]
+    [StringOption(description: "Standalone or Nexus node name for logs and dashboard. Native clusters use CLUSTER_NODE_ID automatically.", Parent = "identity")]
     public string NodeName
     {
         get => _nodeName;
         set => SetField(ref _nodeName, value);
     }
 
-    [EnumOption("Standalone, lobby, or cluster member", Parent = "identity")]
+    [EnumOption("Standalone or Nexus role. Native clusters report cluster member automatically.", Parent = "identity")]
     public ClusterNodeRole NodeRole
     {
         get => _nodeRole;
