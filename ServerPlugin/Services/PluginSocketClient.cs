@@ -297,7 +297,6 @@ public sealed class PluginSocketClient : IDisposable
             NodeRole = Common.NodeRole,
             PluginVersion = pluginVersion,
             GameVersion = Common.GameVersion,
-            NexusServerId = Plugin.Instance?.NexusClusterRedirectService?.GetCurrentServerId(),
             IssuedAtUnixTimeSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             Nonce = Guid.NewGuid().ToString("N")
         };

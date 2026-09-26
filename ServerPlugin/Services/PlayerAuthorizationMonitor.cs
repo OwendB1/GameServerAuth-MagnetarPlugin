@@ -26,7 +26,6 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
 
     private readonly IPluginLogger _log;
     private readonly AuthorizationRuntimeState _runtimeState;
-    private readonly NexusClusterRedirectService _nexusClusterRedirectService;
     private readonly Func<bool> _isServiceConnected;
     private readonly ConcurrentDictionary<long, DateTimeOffset> _pendingPlayers = new ConcurrentDictionary<long, DateTimeOffset>();
     private readonly ConcurrentDictionary<ulong, DateTimeOffset> _detectedPlayers = new ConcurrentDictionary<ulong, DateTimeOffset>();
@@ -52,12 +51,10 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
     public PlayerAuthorizationMonitor(
         IPluginLogger log,
         AuthorizationRuntimeState runtimeState,
-        NexusClusterRedirectService nexusClusterRedirectService,
         Func<bool> isServiceConnected)
     {
         this._log = log ?? throw new ArgumentNullException(nameof(log));
         this._runtimeState = runtimeState ?? throw new ArgumentNullException(nameof(runtimeState));
-        this._nexusClusterRedirectService = nexusClusterRedirectService ?? throw new ArgumentNullException(nameof(nexusClusterRedirectService));
         this._isServiceConnected = isServiceConnected ?? throw new ArgumentNullException(nameof(isServiceConnected));
 
         MyVisualScriptLogicProvider.PlayerConnected += OnPlayerConnected;
@@ -280,29 +277,7 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
             return;
         }
 
-        var redirectEnabled = configuration.RedirectUnauthorizedToLobby && !IsLobbyNode(configuration);
-        var currentNexusServerId = _nexusClusterRedirectService.GetCurrentServerId();
-        var lobbyNexusServerId = _nexusClusterRedirectService.GetRedirectTargetServerId(configuration.LobbyServerId);
-        if (redirectEnabled &&
-            !string.IsNullOrWhiteSpace(lobbyNexusServerId) &&
-            !string.Equals(currentNexusServerId, lobbyNexusServerId, StringComparison.Ordinal))
-        {
-            string redirectFailureReason;
-            if (_nexusClusterRedirectService.TryRedirectPlayer(steamId, lobbyNexusServerId, out redirectFailureReason))
-            {
-                _log.Info($"Redirected unauthorized player {steamId} to Nexus server {lobbyNexusServerId}");
-                _detectedPlayers.TryRemove(steamId, out _);
-                _readyPlayers.TryRemove(steamId, out _);
-                _promptedPlayers.TryRemove(steamId, out _);
-                _cachedAccessStatuses.TryRemove(steamId, out _);
-                _accessStatusRefreshInFlight.TryRemove(steamId, out _);
-                return;
-            }
-
-            _log.Warning($"Failed to redirect unauthorized player {steamId} to lobby {lobbyNexusServerId}: {redirectFailureReason}");
-        }
-
-        if (!ShouldKickUnauthorizedPlayers(configuration))
+        if (!configuration.KickUnauthorizedPlayers)
         {
             return;
         }
@@ -338,12 +313,6 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
         var graceSeconds = Math.Max(5, _runtimeState.Configuration?.AuthorizationGraceSeconds ?? 5);
         if (DateTimeOffset.UtcNow - firstReadyUtc < TimeSpan.FromSeconds(graceSeconds))
         {
-            return;
-        }
-
-        if (IsLobbyNode(_runtimeState.Configuration))
-        {
-            _log.Info($"Leaving player {steamId} connected because this node is configured as Lobby while auth service is disconnected.");
             return;
         }
 
@@ -764,25 +733,17 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
         PluginServerConfiguration configuration,
         CachedPlayerAccessStatus cachedAccessStatus)
     {
-        var isLobbyNode = IsLobbyNode(configuration);
         var now = DateTimeOffset.UtcNow;
         DateTimeOffset lastPromptUtc;
         if (_promptedPlayers.TryGetValue(steamId, out lastPromptUtc) &&
-            (isLobbyNode || now - lastPromptUtc < TimeSpan.FromSeconds(30)))
+            now - lastPromptUtc < TimeSpan.FromSeconds(30))
         {
             return;
         }
 
         _promptedPlayers[steamId] = now;
         var graceSeconds = Math.Max(5, configuration.AuthorizationGraceSeconds);
-        var redirectTarget = _nexusClusterRedirectService.GetRedirectTargetServerId(configuration.LobbyServerId);
-        var actionText = configuration.RedirectUnauthorizedToLobby &&
-                         !isLobbyNode &&
-                         !string.IsNullOrWhiteSpace(redirectTarget)
-            ? "you will be redirected to the lobby"
-            : ShouldKickUnauthorizedPlayers(configuration)
-                ? "you will be kicked"
-                : "access will remain blocked";
+        var actionText = configuration.KickUnauthorizedPlayers ? "you will be kicked" : "access will remain blocked";
         string message;
         string fallbackMessage;
         string logLabel;
@@ -791,65 +752,41 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
             case PluginPlayerAuthorizationStatus.RequiresAccept:
             case PluginPlayerAuthorizationStatus.Authorized:
             case PluginPlayerAuthorizationStatus.AlreadyAuthorized:
-                message = isLobbyNode
-                    ? "This lobby requires authorization. Run !accept."
-                    : $"This cluster requires authorization. Run !accept within {graceSeconds} seconds or {actionText}.";
-                fallbackMessage = isLobbyNode
-                    ? "This lobby requires authorization. Run !accept."
-                    : "This cluster requires authorization. Run !accept.";
+                message = $"This cluster requires authorization. Run !accept within {graceSeconds} seconds or {actionText}.";
+                fallbackMessage = "This cluster requires authorization. Run !accept.";
                 logLabel = "!accept";
                 break;
 
             case PluginPlayerAuthorizationStatus.RequiresLink:
-                message = isLobbyNode
-                    ? "This lobby requires account linking. Run !gsa authorize."
-                    : $"This cluster requires account linking. Run !gsa authorize within {graceSeconds} seconds or {actionText}.";
-                fallbackMessage = isLobbyNode
-                    ? "This lobby requires account linking. Run !gsa authorize."
-                    : "This cluster requires account linking. Run !gsa authorize.";
+                message = $"This cluster requires account linking. Run !gsa authorize within {graceSeconds} seconds or {actionText}.";
+                fallbackMessage = "This cluster requires account linking. Run !gsa authorize.";
                 logLabel = "!gsa authorize";
                 break;
 
             case PluginPlayerAuthorizationStatus.RequiresGuildJoin:
-                message = isLobbyNode
-                    ? "Join owning Discord guild first, then run !accept."
-                    : $"Join owning Discord guild first. Run !accept within {graceSeconds} seconds to open guild join flow or {actionText}.";
-                fallbackMessage = isLobbyNode
-                    ? "Join owning Discord guild first, then run !accept."
-                    : "Join owning Discord guild first. Run !accept.";
+                message = $"Join owning Discord guild first. Run !accept within {graceSeconds} seconds to open guild join flow or {actionText}.";
+                fallbackMessage = "Join owning Discord guild first. Run !accept.";
                 logLabel = "guild-join";
                 break;
 
             case PluginPlayerAuthorizationStatus.RequiresRole:
-                message = isLobbyNode
-                    ? "Acquire one of the required Discord roles, then run !accept."
-                    : $"Acquire one of the required Discord roles. Run !accept within {graceSeconds} seconds to open cluster instructions or {actionText}.";
-                fallbackMessage = isLobbyNode
-                    ? "Acquire one of the required Discord roles, then run !accept."
-                    : "Acquire one of the required Discord roles. Run !accept.";
+                message = $"Acquire one of the required Discord roles. Run !accept within {graceSeconds} seconds to open cluster instructions or {actionText}.";
+                fallbackMessage = "Acquire one of the required Discord roles. Run !accept.";
                 logLabel = "required-role";
                 break;
 
             case PluginPlayerAuthorizationStatus.AccessBlocked:
                 var blockedMessage = string.IsNullOrWhiteSpace(cachedAccessStatus.Message)
-                    ? (isLobbyNode
-                        ? "Access to this lobby is blocked by the cluster owner."
-                        : "Access to this cluster is blocked by the cluster owner.")
+                    ? "Access to this cluster is blocked by the cluster owner."
                     : cachedAccessStatus.Message.Trim();
-                message = isLobbyNode
-                    ? blockedMessage
-                    : $"{blockedMessage} You cannot authorize here and {actionText}.";
+                message = $"{blockedMessage} You cannot authorize here and {actionText}.";
                 fallbackMessage = blockedMessage;
                 logLabel = "blocked";
                 break;
 
             default:
-                message = isLobbyNode
-                    ? "This lobby requires authorization. Run !accept if your accounts are linked, or !gsa authorize if they are not."
-                    : $"This cluster requires authorization. Run !accept if your accounts are linked, or !gsa authorize within {graceSeconds} seconds if they are not, or {actionText}.";
-                fallbackMessage = isLobbyNode
-                    ? "This lobby requires authorization. Run !accept if linked, or !gsa authorize if not."
-                    : "This cluster requires authorization. Run !accept if linked, or !gsa authorize if not.";
+                message = $"This cluster requires authorization. Run !accept if your accounts are linked, or !gsa authorize within {graceSeconds} seconds if they are not, or {actionText}.";
+                fallbackMessage = "This cluster requires authorization. Run !accept if linked, or !gsa authorize if not.";
                 logLabel = "mixed";
                 break;
         }
@@ -919,23 +856,18 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
     private void PromptServiceUnavailablePlayer(ulong steamId)
     {
         var configuration = _runtimeState.Configuration;
-        var isLobbyNode = IsLobbyNode(configuration);
         var now = DateTimeOffset.UtcNow;
         DateTimeOffset lastPromptUtc;
         if (_promptedPlayers.TryGetValue(steamId, out lastPromptUtc) &&
-            (isLobbyNode || now - lastPromptUtc < TimeSpan.FromSeconds(30)))
+            now - lastPromptUtc < TimeSpan.FromSeconds(30))
         {
             return;
         }
 
         _promptedPlayers[steamId] = now;
         var graceSeconds = Math.Max(5, configuration?.AuthorizationGraceSeconds ?? 5);
-        var message = isLobbyNode
-            ? "Cluster authorization service is currently unavailable. New joins are blocked until the service reconnects."
-            : $"Cluster authorization service is currently unavailable. New joins are blocked. You will be removed in {graceSeconds} seconds unless the service reconnects.";
-        var fallbackMessage = isLobbyNode
-            ? "Cluster authorization service unavailable. New joins are blocked until it reconnects."
-            : "Cluster authorization service unavailable. New joins are blocked.";
+        var message = $"Cluster authorization service is currently unavailable. New joins are blocked. You will be removed in {graceSeconds} seconds unless the service reconnects.";
+        var fallbackMessage = "Cluster authorization service unavailable. New joins are blocked.";
         if (Plugin.Instance.TrySendPlayerMessage(
                 steamId,
                 message,
@@ -943,16 +875,6 @@ public sealed class PlayerAuthorizationMonitor : IDisposable
         {
             _log.Info($"Prompted player {steamId} that auth service is unavailable and new joins are blocked.");
         }
-    }
-
-    private static bool IsLobbyNode(PluginServerConfiguration configuration)
-    {
-        return (configuration?.NodeRole ?? Plugin.Instance.Config.NodeRole) == ClusterNodeRole.Lobby;
-    }
-
-    private static bool ShouldKickUnauthorizedPlayers(PluginServerConfiguration configuration)
-    {
-        return configuration != null && configuration.KickUnauthorizedPlayers && !IsLobbyNode(configuration);
     }
 
     private bool IsAcceptSuppressionActive(ulong steamId)

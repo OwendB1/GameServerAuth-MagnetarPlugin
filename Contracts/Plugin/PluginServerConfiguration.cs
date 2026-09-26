@@ -15,17 +15,8 @@ public sealed class PluginServerConfiguration
     [DataMember(Order = 3)]
     public string DisplayName { get; set; } = string.Empty;
 
-    [DataMember(Order = 4)]
-    public ClusterNodeRole NodeRole { get; set; }
-
-    [DataMember(Order = 5)]
-    public string? LobbyServerId { get; set; }
-
     [DataMember(Order = 6)]
     public bool KickUnauthorizedPlayers { get; set; }
-
-    [DataMember(Order = 7)]
-    public bool RedirectUnauthorizedToLobby { get; set; }
 
     [DataMember(Order = 8)]
     public int AuthorizationGraceSeconds { get; set; }

@@ -31,7 +31,7 @@ public static class Common
         : string.IsNullOrWhiteSpace(Config?.NodeName) ? Environment.MachineName : Config.NodeName.Trim();
     public static ClusterNodeRole NodeRole => PluginCluster.IsClusterProcess
         ? ClusterNodeRole.ClusterMember
-        : Config?.NodeRole ?? ClusterNodeRole.Standalone;
+        : ClusterNodeRole.Standalone;
 
     public static ICommonPlugin Plugin { get; private set; }
     public static IPluginLogger Logger { get; private set; }

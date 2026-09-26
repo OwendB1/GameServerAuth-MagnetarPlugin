@@ -56,7 +56,6 @@ public class Plugin : IPlugin, ICommonPlugin
     public PluginPlayerAuthorizationClient PlayerAuthorizationClient { get; private set; }
     public AuthorizationRuntimeState AuthorizationRuntime { get; private set; }
     public PlayerAuthorizationMonitor PlayerAuthorizationMonitor { get; private set; }
-    public NexusClusterRedirectService NexusClusterRedirectService { get; private set; }
     public bool IsRuntimeEnabled => _runtimeEnabled;
     public bool IsSessionLoaded => MySession.Static != null;
     public bool IsGameplayReady => MySession.Static?.Ready == true || MySandboxGame.IsGameReady;
@@ -99,7 +98,6 @@ public class Plugin : IPlugin, ICommonPlugin
         }
 
         AuthorizationRuntime = new AuthorizationRuntimeState();
-        NexusClusterRedirectService = new NexusClusterRedirectService(Log);
         PlayerAuthorizationClient = new PluginPlayerAuthorizationClient(Log);
         SocketClient = new PluginSocketClient(Log, AuthorizationRuntime, BuildHeartbeatPayload);
         _config.PropertyChanged += ConfigChanged;
@@ -119,7 +117,6 @@ public class Plugin : IPlugin, ICommonPlugin
             SocketClient?.Dispose();
             SocketClient = null;
             AuthorizationRuntime = null;
-            NexusClusterRedirectService = null;
 
             if (_config != null)
             {
@@ -249,7 +246,7 @@ public class Plugin : IPlugin, ICommonPlugin
             return;
         }
 
-        if (AuthorizationRuntime == null || NexusClusterRedirectService == null)
+        if (AuthorizationRuntime == null)
         {
             LogManagerState("Runtime services unavailable. Player authorization monitor is waiting for plugin initialization.");
             return;
@@ -260,7 +257,6 @@ public class Plugin : IPlugin, ICommonPlugin
             PlayerAuthorizationMonitor = new PlayerAuthorizationMonitor(
                 Log,
                 AuthorizationRuntime,
-                NexusClusterRedirectService,
                 () => SocketClient?.IsConnected == true);
             Log.Info("Player authorization monitor initialized.");
         }
@@ -275,7 +271,6 @@ public class Plugin : IPlugin, ICommonPlugin
             OnlinePlayers = PlayerAuthorizationMonitor?.OnlinePlayerCount ?? 0,
             AuthorizedPlayers = AuthorizationRuntime?.AuthorizedPlayerCount ?? 0,
             StatusMessage = SocketClient?.LastError,
-            NexusServerId = NexusClusterRedirectService?.GetCurrentServerId(),
             NodeName = Common.NodeName
         };
     }

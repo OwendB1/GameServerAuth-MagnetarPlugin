@@ -2,7 +2,7 @@
 
 Server-only Space Engineers plugin for Magnetar using the Magnetar Plugin SDK.
 
-GameServerAuth connects a dedicated server to the Game Server Auth control plane. Players link Discord and Steam accounts, then authorize in-game. Server owners can manage role-based join access, promotion levels, reserved slots, and optional cluster lobby redirects from the web dashboard.
+GameServerAuth connects a dedicated server to the Game Server Auth control plane. Players link Discord and Steam accounts, then authorize in-game. Server owners can manage role-based join access, promotion levels, and reserved slots from the web dashboard.
 
 ## Projects
 
@@ -62,17 +62,21 @@ debounced to one XML write per change burst, and flushed when the plugin unloads
 Native cluster nodes derive a stable GSA instance ID from the GSA registration
 ID, `CLUSTER_ID`, and `CLUSTER_NODE_ID`. The dashboard name comes from
 `CLUSTER_NODE_ID`. They report as cluster members, including the
-World Authority, regardless of the shared `NodeName` and `NodeRole` settings.
+World Authority. The node role is selected automatically from the runtime.
 The plugin refuses a cluster connection when either launcher identity is missing.
-Standalone or Nexus processes generate an instance ID per process; cloned
+Standalone processes generate an instance ID per process; cloned
 configuration does not require a unique `ServerId` setting.
 Important options:
 
 - `Enabled` - turns the plugin runtime on or off.
 - `DiscordGuildId` - Discord guild identifier claimed for this server.
 - `ClusterId`, `ClusterSecret` - GSA cluster identity and signing configuration.
-- `NodeName`, `NodeRole` - standalone or Nexus identity; native clusters use launcher identity instead.
-- `LobbyServerId` - target lobby server for redirecting unauthorized cluster players.
+- `NodeName` - standalone display name; native clusters use launcher identity instead.
+
+Nexus is unsupported by this Magnetar plugin. The node role is always standalone
+or native cluster member; unauthorized players are kicked when GSA requests it.
+The wire payload keeps legacy Nexus fields empty for compatibility with the
+current GSA service protocol.
 
 GSA management limits concurrent plugin connections per registered cluster.
 Its connection cap must cover every node that connects, including the World

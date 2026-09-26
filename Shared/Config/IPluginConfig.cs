@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Contracts.Plugin;
 
 namespace Shared.Config;
 
@@ -12,6 +11,4 @@ public interface IPluginConfig : INotifyPropertyChanged
     string ClusterId { get; set; }
     string ClusterSecret { get; set; }
     string NodeName { get; set; }
-    ClusterNodeRole NodeRole { get; set; }
-    string LobbyServerId { get; set; }
 }
